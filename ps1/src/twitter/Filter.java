@@ -3,7 +3,11 @@
  */
 package twitter;
 
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Filter consists of methods that filter a list of tweets for those matching a
@@ -27,7 +31,12 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> writtenBy = new LinkedList<>();
+        for (Tweet tweet : tweets) {
+            if(tweet.getAuthor().toLowerCase().equals(username.toLowerCase())) 
+                writtenBy.add(tweet);
+        }
+        return writtenBy;
     }
 
     /**
@@ -41,7 +50,15 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> inTimespan = new LinkedList<>();
+        for (Tweet tweet : tweets) {
+            Instant time = tweet.getTimestamp();
+            if (time.isAfter(timespan.getStart()) && time.isBefore(timespan.getEnd()))
+                inTimespan.add(tweet);
+            else if (time.equals(timespan.getStart()) || time.equals(timespan.getEnd()))
+                    inTimespan.add(tweet);
+        }
+        return inTimespan;
     }
 
     /**
@@ -60,7 +77,30 @@ public class Filter {
      *         same order as in the input list.
      */
     public static List<Tweet> containing(List<Tweet> tweets, List<String> words) {
-        throw new RuntimeException("not implemented");
+        Set<String> wordSet = new HashSet<String>();
+        List<Tweet> containing = new LinkedList<>();
+        for (String word : words) {
+            wordSet.add(word.toLowerCase());
+        }
+        for (Tweet tweet : tweets) {
+            String[] tweetWords = parseWords(tweet.getText());
+            for (String tweetWord : tweetWords) {
+                if (wordSet.contains(tweetWord.toLowerCase())) {
+                    containing.add(tweet);
+                    break;
+                }
+            }
+        }
+        return containing;
+    }
+    
+    /**
+     * Parse the text of a tweet into a list of words
+     * @param text : the text of a tweet
+     * @return an array of the words contained in the text
+     */
+    private static String[] parseWords(String text) {
+        return text.split("\\s");
     }
 
 }
