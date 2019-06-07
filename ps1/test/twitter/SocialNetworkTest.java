@@ -5,7 +5,9 @@ package twitter;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +18,41 @@ import org.junit.Test;
 public class SocialNetworkTest {
 
     /*
-     * TODO: your testing strategies for these methods should go here.
-     * See the ic03-testing exercise for examples of what a testing strategy comment looks like.
-     * Make sure you have partitions.
+     * guessFollowsGraph Tests:
+     *  a) Input Possibilities:
+     *      Empty list 
+     *      List with no mentions
+     *      1+ tweet contains mention of the author (can't follow self)
+     *      A tweet mentions multiple other users
+     *      Multiple mentions across the list of tweets (as 1st, last, & middle elements)
+     *      Multiple tweets with mentions by the same author
+     *  
+     *  b) Test Cases:
+     *      1) Empty list / no mentions
+     *      2) A list with mentions occurring as 1st, middle, & last elements
+     *          With other middle tweets that contain no mentions
+     *          One of the "no mention" tweets mentions the author
+     *          One of the "mention" tweets contains multiple mentions
+     *          One author has multiple tweets mentioning different users
+     *          
+     * influencers tests:
+     *  a) Input possibilities:
+     *      Empty map
+     *      Map out of order
+     *      Map already in order
      */
+    
+    private static final Instant instant = Instant.parse("2016-02-17T10:00:00Z");
+    private static final String author1 = "Joe";
+    private static final String author2 = "Jim";
+    private static final String author3 = "Julie";
+    // 5 tweets for guessFollowGraph tests
+    private static final Tweet mentionTweet1 = new Tweet(1, author1, "Hey @" + author3, instant);
+    private static final Tweet mentionTweet2 = new Tweet(2, author2, "My favorite people are @" + author1 + "and @" + author3, instant);
+    private static final Tweet mentionTweet3 = new Tweet(3, author3, "Thank you @" + author2 + "!", instant);
+    private static final Tweet selfMention = new Tweet(4, author1, "Actually @" + author1 + " is better.", instant);
+    private static final Tweet noMentionTweet = new Tweet(5, author2, "I always have premium content", instant);
+    private static final Tweet mentionTweet4 = new Tweet(6, author1, "Actually, my tweets are better @" + author2 + "!", instant);
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
@@ -34,11 +67,28 @@ public class SocialNetworkTest {
     }
     
     @Test
+    public void testGuessFollowsGraphMultipleMentions() {
+        Map<String, Set<String>> followsGraph = SocialNetwork.guessFollowsGraph(Arrays.asList(mentionTweet1, selfMention, 
+                mentionTweet2, noMentionTweet, mentionTweet3, mentionTweet4));
+        assertEquals("expected graph to have 3 mappings", 3, followsGraph.size());
+    }
+    
+    @Test
     public void testInfluencersEmpty() {
         Map<String, Set<String>> followsGraph = new HashMap<>();
         List<String> influencers = SocialNetwork.influencers(followsGraph);
         
         assertTrue("expected empty list", influencers.isEmpty());
+    }
+    
+    @Test
+    public void testInfluencersWithResults() {
+        Map<String, Set<String>> followsGraph = SocialNetwork.guessFollowsGraph(Arrays.asList(mentionTweet1, 
+                mentionTweet2, mentionTweet3, mentionTweet4));
+        List<String> influencers = SocialNetwork.influencers(followsGraph);
+        
+        assertEquals("expected list of size 3", 3, influencers.size());
+        assertEquals("expect author3 to be first influencer", author3.toLowerCase(), influencers.get(0));
     }
 
     /*

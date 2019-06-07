@@ -3,6 +3,12 @@
  */
 package twitter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +47,21 @@ public class SocialNetwork {
      *         either authors or @-mentions in the list of tweets.
      */
     public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        Map<String, Set<String>> followsGraph = new HashMap<>();
+        for (Tweet tweet : tweets) {
+            Set<String> mentions = Extract.getMentionedUsers(tweets);
+            if (!mentions.isEmpty()) {
+                String author = tweet.getAuthor();
+                if (followsGraph.containsKey(author)) {
+                    Set<String> following = followsGraph.get(author);
+                    following.addAll(mentions);
+                    followsGraph.put(author, following);
+;                } else {
+                    followsGraph.put(author, new HashSet<String>(mentions));
+                }
+            }
+        }
+        return followsGraph;
     }
 
     /**
@@ -54,7 +74,30 @@ public class SocialNetwork {
      *         descending order of follower count.
      */
     public static List<String> influencers(Map<String, Set<String>> followsGraph) {
-        throw new RuntimeException("not implemented");
+        Map<String, Integer> followersGraph = new HashMap<String, Integer>();
+        for (Map.Entry<String, Set<String>> entry : followsGraph.entrySet()) {
+            for (String user : entry.getValue()) {
+                if (followersGraph.containsKey(user)) {
+                    followersGraph.put(user, followersGraph.get(user)+1);
+                } else {
+                    followersGraph.put(user, 1);
+                }
+            }
+        }
+        // Create list of entries in the followers graph
+        // Sort in descending order of follower count by creating an entry comparator
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<>(followersGraph.entrySet());
+        Collections.sort(entryList, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> user1, Map.Entry<String, Integer> user2) {
+                return user2.getValue().compareTo(user1.getValue());
+            }
+        });
+        // Put map keys into list
+        List<String> influencers = new LinkedList<>();
+        for (Map.Entry<String, Integer> entry : entryList) {
+            influencers.add(entry.getKey());
+        }
+        return influencers;
     }
 
 }
