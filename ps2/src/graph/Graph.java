@@ -13,7 +13,7 @@ import java.util.Set;
  * Edges are directed and have a positive weight of type {@code int}.
  * 
  * <p>PS2 instructions: this is a required ADT interface.
- * You MUST NOT change the specifications or add additional methods.
+ * You MUST NOT change the  specifications or add additional methods.
  * 
  * @param <L> type of vertex labels in this graph, must be immutable
  */

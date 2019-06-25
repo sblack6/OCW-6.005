@@ -60,7 +60,7 @@ public class SocialNetwork {
                     followsGraph.put(author, new HashSet<String>(mentions));
                 }
             }
-        }
+        }        
         return followsGraph;
     }
 
